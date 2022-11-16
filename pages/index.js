@@ -2,6 +2,7 @@ import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
 import { useState, useEffect } from 'react';
 import Candid from '../components/Candid';
 import { db } from "../utils/firebase";
+import Link from 'next/link';
 
 
 export default function Home() {
@@ -14,6 +15,7 @@ export default function Home() {
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setAllPosts(snapshot.docs.map((doc) => ({...doc.data() })))
     });
+    console.log(allPosts)
     return unsubscribe;
   };
 
@@ -25,7 +27,11 @@ export default function Home() {
     <div className="my-12 text-lg font-medium">
       <h2>See what other people are candid about!</h2>
       {allPosts.map((post) => (
-        <Candid {...post}></Candid>
+        <Candid key={post.id} {...post}>
+          <Link href={{ pathname: `/${post.id}`, query: { ...post } }}>
+            <button className="text-sm">{post.thoughts?.length > 0 ? post.thoughts.length : 0} thoughts</button>
+          </Link>
+        </Candid>
       ))}
     </div>
   )

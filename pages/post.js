@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { auth, db } from "../utils/firebase";
 import { useRouter } from "next/router";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { addDoc, collection, doc, serverTimestamp, updateDoc } from "firebase/firestore";
 import { toast } from "react-toastify";
 
 export default function Post() {
@@ -32,6 +32,14 @@ export default function Post() {
         return; 
     }
 
+    if(post?.hasOwnProperty("id")){
+        const docRef = doc(db, "posts", post.id);
+        const updatedPost = {...post, timestamp: serverTimestamp()}
+        await updateDoc(docRef, updatedPost);
+
+        return router.push("/");
+    }
+
     await addDoc(collectionRef, {
         ...post,
         timestamp: serverTimestamp(),
@@ -40,7 +48,9 @@ export default function Post() {
         username: user.displayName,
     });
     setPost({ description: "" });
-    return router.push("/")
+    toast.success("A Candid was created!", {position: toast.POSITION.TOP_CENTER, autoClose: 1500});
+
+    return router.push("/");
   }
 
   // Checking user
